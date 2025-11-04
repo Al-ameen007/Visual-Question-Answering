@@ -1,72 +1,239 @@
-# Visual Question Answering with BLIP Model
+# BLIP-VQA Training on VizWiz Dataset
 
-This project demonstrates how to use the BLIP (Bootstrapping Language-Image Pre-training) model for Visual Question Answering (VQA), with a focus on comparing a base pre-trained model with a fine-tuned model. The goal is to evaluate the performance of the BLIP model on the VizWiz dataset by generating predictions from both models and visualizing the results to assess improvements from task-specific fine-tuning.
+Train BLIP Visual Question Answering model on the VizWiz dataset.
 
-## Project Overview
+## Installation
 
-The purpose of this project is to evaluate how fine-tuning the BLIP model improves Visual Question Answering performance on the VizWiz dataset. By comparing a base model pre-trained on general VQA tasks with a model fine-tuned on the VizWiz dataset, the notebook demonstrates the benefits of task-specific training.
+```bash
+pip install -r requirements.txt
+```
 
-### Workflow:
-1. **Loading the dataset** (VizWiz).
-2. **Preparing the models** (Base and Fine-Tuned BLIP).
-3. **Generating predictions** for image-question pairs.
-4. **Visualizing and comparing** the performance of both models.
+## Quick Start
 
----
+### Basic Training (with defaults)
 
-## Key Sections
+```bash
+python train.py
+```
 
-### 1. Environment Setup
-The environment setup includes installing necessary libraries such as Hugging Face’s `transformers` and `datasets` for model loading and dataset processing. We also install `rouge` for evaluation purposes. This ensures that all dependencies are in place to process data and run models.
+### Custom Training
 
-### 2. Dataset Loading
-The VizWiz dataset is used for the Visual Question Answering task, consisting of images paired with questions. The notebook loads both the validation and test sets, where the validation set is used for model predictions, and the test set can be used for future generalization performance assessment.
+```bash
+python train.py \
+    --num_epochs 5 \
+    --batch_size 32 \
+    --learning_rate 1e-4 \
+    --save_every_epoch \
+    --plot_training
+```
 
-The dataset consists of image-question-answer triples that are fed into the model for inference.
+## Command-Line Arguments
 
-### 3. Model Preparation
-We load two versions of the BLIP model:
-- **Base Model:** Pre-trained on general VQA tasks, but not specifically fine-tuned on VizWiz.
-- **Fine-Tuned Model:** Fine-tuned on VizWiz data, optimizing it for better performance in this specific domain.
+| Argument | Type | Default | Description |
+|----------|------|---------|-------------|
+| `--train_url` | str | `https://vizwiz.cs.colorado.edu/VizWiz_final/images/train.zip` | Training data URL |
+| `--val_url` | str | `https://vizwiz.cs.colorado.edu/VizWiz_final/images/val.zip` | Validation data URL |
+| `--model_name` | str | `Salesforce/blip-vqa-base` | Pretrained model |
+| `--data_dir` | str | `./data` | Data directory |
+| `--save_dir` | str | `./checkpoints` | Checkpoint directory |
+| `--num_epochs` | int | `3` | Number of epochs |
+| `--batch_size` | int | `16` | Batch size |
+| `--learning_rate` | float | `5e-5` | Learning rate |
+| `--weight_decay` | float | `0.01` | Weight decay |
+| `--num_workers` | int | `4` | Data loader workers |
+| `--eval_freq` | int | `100` | Evaluation frequency |
+| `--eval_iter` | int | `50` | Eval batch count |
+| `--save_every_epoch` | flag | False | Save after each epoch |
+| `--plot_training` | flag | False | Generate training plot |
 
-Both models are prepared for inference by loading them onto a suitable device (e.g., GPU) and utilizing a processor to handle image-question pair preprocessing.
+## Examples
 
-### 4. Inference Process
-During the inference step, image-question pairs from the validation dataset are fed into both models. For each pair, two predictions are generated:
-- One from the base model.
-- One from the fine-tuned model.
+### Train for 10 epochs with larger batch size
 
-The notebook processes these pairs by converting them into a format the models can understand, generating predictions, and then converting those predictions into human-readable text.
+```bash
+python train.py --num_epochs 10 --batch_size 32
+```
 
-### 5. Results Comparison
-This section compares the predictions from both models for each image-question pair. The comparison includes:
-- The original question.
-- The correct answer from the dataset.
-- The predicted answer from the base model.
-- The predicted answer from the fine-tuned model.
+### Train with custom learning rate and save checkpoints
 
-This comparison helps illustrate how fine-tuning on VizWiz data improves model accuracy and adaptation to task-specific requirements.
+```bash
+python train.py \
+    --learning_rate 1e-4 \
+    --num_epochs 5 \
+    --save_every_epoch \
+    --plot_training
+```
 
-### 6. Visualization of Results
-To make the comparison more intuitive, the notebook visualizes the image, the question, and the predicted answers from both models. Each visualization includes:
-- The dataset image.
-- The question related to the image.
-- The correct answer.
-- Predictions from the base and fine-tuned models.
+### Train on custom data directory
 
-These graphical comparisons highlight the strengths and weaknesses of each model.
+```bash
+python train.py \
+    --data_dir /path/to/data \
+    --save_dir /path/to/checkpoints
+```
 
-### 7. Evaluation Metrics
-Quantitative evaluation metrics are used to compare the models’ performance, with metrics like ROUGE being used to measure the similarity between the predicted answers and the correct answers. These metrics provide insights into how well the models are performing in terms of answer accuracy.
+### Full training with all options
 
-### 8. Conclusion
-The project concludes with a comparison of the base and fine-tuned models, demonstrating that fine-tuning on the VizWiz dataset leads to better VQA performance. Both the visual and quantitative comparisons indicate that fine-tuning improves the model’s ability to understand context in image-based questions.
+```bash
+python train.py \
+    --model_name Salesforce/blip-vqa-base \
+    --num_epochs 10 \
+    --batch_size 32 \
+    --learning_rate 5e-5 \
+    --weight_decay 0.01 \
+    --num_workers 8 \
+    --eval_freq 50 \
+    --eval_iter 100 \
+    --save_every_epoch \
+    --plot_training
+```
 
----
+## Output
 
-## How to Run
-1. Set up the environment by installing the necessary dependencies.
-2. Load the VizWiz dataset and prepare the models.
-3. Run the inference to generate predictions.
-4. Compare and visualize the results.
+After training, you'll find:
 
+- `./checkpoints/final_model/` - Final trained model
+- `./checkpoints/best_model/` - Best model (lowest val loss)
+- `./checkpoints/checkpoint-epoch-*.pt` - Per-epoch checkpoints (if `--save_every_epoch`)
+- `training_curve.png` - Training plot (if `--plot_training`)
+
+## Results
+
+The model was trained for 5 epochs on the VizWiz dataset. Performance was evaluated using the accuracy metric specified by the VizWiz dataset creators:
+
+```
+acc = min(#Humans_that_answered_that_answer / 3, 1)
+```
+
+Implementation details: Accuracy was calculated using the Universal Sentence Encoder from TensorFlow Hub. Embeddings of predicted and candidate answers were generated, and cosine similarity was computed. A predicted answer was considered correct if its maximum similarity score with candidate answers was ≥ 0.8.
+
+### Training Progress
+
+| Epoch | Training Loss |
+|-------|---------------|
+| 1     | 3.267         |
+| 2     | 2.509         |
+| 3     | 2.118         |
+| 4     | 1.901         |
+| 5     | 1.778         |
+
+### Accuracy on VizWiz Validation Set
+
+| Model | Overall Accuracy | Yes/No Accuracy | Number Accuracy | Other Accuracy |
+|-------|------------------|-----------------|-----------------|----------------|
+| **Base Model** | 33.69% | 74.36% | 31.0% | 15.28% |
+| **Trained Model** | **50.92%** | **82.56%** | **48.77%** | **43.06%** |
+| LXR955 (SOTA) | 55.4% | 74.0% | 39.0% | 24.76% |
+
+**Key Findings:**
+
+- **+17.23%** overall accuracy improvement over base model
+- **+8.2%** improvement on yes/no questions
+- **+17.77%** improvement on number questions  
+- **+27.78%** improvement on "other" category questions
+- Achieved **92.1%** of state-of-the-art (LXR955) performance
+- Outperformed SOTA on yes/no questions (**+8.56%**)
+
+*Note: LXR955 is the current best model on the VizWiz dataset according to Papers with Code.*
+
+## Loading Trained Model
+
+```python
+from transformers import BlipForQuestionAnswering, AutoProcessor
+
+# Load from HuggingFace Hub (pre-trained model)
+model = BlipForQuestionAnswering.from_pretrained('MohammadAlameenArtan/BLIP_Model_VizWiz')
+processor = AutoProcessor.from_pretrained('MohammadAlameenArtan/BLIP_Model_VizWiz')
+
+# Or load from local checkpoint
+model = BlipForQuestionAnswering.from_pretrained('./checkpoints/best_model')
+processor = AutoProcessor.from_pretrained('./checkpoints/best_model')
+```
+
+## Inference
+
+### Simple Inference
+
+Run inference on a single image using the pre-trained model from HuggingFace:
+
+```bash
+# Using URL (uses HuggingFace model by default)
+python inference.py \
+    --image "https://example.com/image.jpg" \
+    --question "What is in the picture?"
+
+# Using local file
+python inference.py \
+    --image "./path/to/image.jpg" \
+    --question "What color is the car?"
+
+# Using your own trained model
+python inference.py \
+    --image "image.jpg" \
+    --question "How many people?" \
+    --model_path ./checkpoints/final_model
+```
+
+### Compare Base vs Trained Model
+
+Compare predictions between base and trained models (uses HuggingFace model by default):
+
+```bash
+# Basic comparison (trained model from HuggingFace)
+python inference_compare.py \
+    --image "https://example.com/image.jpg" \
+    --question "What vehicles are in the picture?"
+
+# With correct answer and visualization
+python inference_compare.py \
+    --image "https://example.com/car.jpg" \
+    --question "What color is the car?" \
+    --correct_answer "red" \
+    --visualize
+
+# Save visualization
+python inference_compare.py \
+    --image "image.jpg" \
+    --question "What is this?" \
+    --correct_answer "cat" \
+    --save_viz comparison.png
+
+# Use your own trained model instead
+python inference_compare.py \
+    --image "image.jpg" \
+    --question "What is this?" \
+    --trained_model ./checkpoints/best_model
+```
+
+## Programmatic Inference
+
+```python
+from inference import load_model, load_image, predict_answer
+
+# Load model from HuggingFace Hub
+model, processor, device = load_model('MohammadAlameenArtan/BLIP_Model_VizWiz')
+
+# Or load from local checkpoint
+# model, processor, device = load_model('./checkpoints/best_model')
+
+# Load image (URL or file path)
+image = load_image('https://example.com/image.jpg')
+
+# Get prediction
+answer = predict_answer(image, "What is in the image?", model, processor, device)
+print(f"Answer: {answer}")
+```
+
+## Project Structure
+
+```
+.
+├── train.py              # Training script (CLI)
+├── inference.py          # Simple inference (CLI)
+├── inference_compare.py  # Compare base vs trained (CLI)
+├── engine.py             # Training engine
+├── data.py               # Data loading
+├── requirements.txt      # Dependencies
+├── example_usage.py      # Programmatic usage example
+└── README.md             # This file
+```
