@@ -56,13 +56,16 @@ def calc_loss_batch(batch, model, device):
 
 def calc_loss_loader(dataloader, model, device, num_batches=None):
     total_loss = 0
-    
+
     if len(dataloader) == 0:
         return float('nan')
     elif num_batches is None:
         num_batches = len(dataloader)
     else:
         num_batches = min(num_batches, len(dataloader))
+
+    if num_batches == 0:
+        return float('nan')
     
     for i, batch in enumerate(dataloader):
         if i < num_batches:

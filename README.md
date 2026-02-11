@@ -174,37 +174,6 @@ python inference.py \
     --model_path ./checkpoints/final_model
 ```
 
-### Compare Base vs Trained Model
-
-Compare predictions between base and trained models (uses HuggingFace model by default):
-
-```bash
-# Basic comparison (trained model from HuggingFace)
-python inference_compare.py \
-    --image "https://example.com/image.jpg" \
-    --question "What vehicles are in the picture?"
-
-# With correct answer and visualization
-python inference_compare.py \
-    --image "https://example.com/car.jpg" \
-    --question "What color is the car?" \
-    --correct_answer "red" \
-    --visualize
-
-# Save visualization
-python inference_compare.py \
-    --image "image.jpg" \
-    --question "What is this?" \
-    --correct_answer "cat" \
-    --save_viz comparison.png
-
-# Use your own trained model instead
-python inference_compare.py \
-    --image "image.jpg" \
-    --question "What is this?" \
-    --trained_model ./checkpoints/best_model
-```
-
 ## Programmatic Inference
 
 ```python
@@ -230,10 +199,9 @@ print(f"Answer: {answer}")
 .
 ├── train.py              # Training script (CLI)
 ├── inference.py          # Simple inference (CLI)
-├── inference_compare.py  # Compare base vs trained (CLI)
 ├── engine.py             # Training engine
 ├── data.py               # Data loading
+├── playground.ipynb      # Interactive notebook for experimentation
 ├── requirements.txt      # Dependencies
-├── example_usage.py      # Programmatic usage example
 └── README.md             # This file
 ```

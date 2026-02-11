@@ -2,7 +2,6 @@ import os
 import zipfile
 import requests
 import collections
-import copy
 from tqdm import tqdm
 from PIL import Image
 import torch
@@ -54,16 +53,18 @@ def filter_unanswerable(dataset):
 
 
 def add_most_common_answer(dataset):
-    modified_dataset = copy.deepcopy(dataset)
     max_answer = []
-    
-    for row in tqdm(modified_dataset, desc='Adding most common answer'):
+
+    for row in tqdm(dataset, desc='Adding most common answer'):
         answer_list = row['answers']
-        answer_counts = collections.Counter(answer_list)
-        most_common_answer = answer_counts.most_common(1)[0][0]
-        max_answer.append(most_common_answer)
-    
-    modified_dataset = modified_dataset.add_column('max_answer', max_answer)
+        if not answer_list:
+            max_answer.append('')
+        else:
+            answer_counts = collections.Counter(answer_list)
+            most_common_answer = answer_counts.most_common(1)[0][0]
+            max_answer.append(most_common_answer)
+
+    modified_dataset = dataset.add_column('max_answer', max_answer)
     return modified_dataset
 
 
@@ -174,7 +175,7 @@ def create_inference_dataloader(dataset_name, processor_name_or_path, image_dir,
         raise ValueError(f"dataset_name must be one of {list(dataset_mapping.keys())}")
     
     dataset = load_dataset(dataset_mapping[dataset_name])
-    hf_dataset = dataset[dataset_name if dataset_name != 'validation' else 'validation']
+    hf_dataset = dataset[dataset_name]
     
     processor = AutoProcessor.from_pretrained(processor_name_or_path)
     
