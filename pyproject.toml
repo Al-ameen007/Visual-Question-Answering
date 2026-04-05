@@ -58,7 +58,7 @@ packages = ["src/vqa"]
 # ── Ruff (replaces flake8, isort, pyflakes, pycodestyle) ──────────
 [tool.ruff]
 src = ["src", "tests"]
-line-length = 88
+line-length = 100
 
 [tool.ruff.lint]
 select = [
