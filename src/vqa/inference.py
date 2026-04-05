@@ -45,12 +45,8 @@ def predict_answer(image, question, model, processor, device):
 def main():
     parser = argparse.ArgumentParser(description="Run inference on BLIP-VQA model")
 
-    parser.add_argument(
-        "--image", type=str, required=True, help="Path to image file or URL"
-    )
-    parser.add_argument(
-        "--question", type=str, required=True, help="Question about the image"
-    )
+    parser.add_argument("--image", type=str, required=True, help="Path to image file or URL")
+    parser.add_argument("--question", type=str, required=True, help="Question about the image")
     parser.add_argument(
         "--model_path",
         type=str,

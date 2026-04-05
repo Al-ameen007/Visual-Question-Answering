@@ -46,16 +46,12 @@ def download_and_extract_data(urls, output_dir="./data"):
 
 
 def update_filename_column(dataset, path):
-    modified_dataset = dataset.map(
-        lambda example: {"filename": path + example["filename"]}
-    )
+    modified_dataset = dataset.map(lambda example: {"filename": path + example["filename"]})
     return modified_dataset
 
 
 def filter_unanswerable(dataset):
-    filtered_dataset = dataset.filter(
-        lambda example: example["answer_type"] != "unanswerable"
-    )
+    filtered_dataset = dataset.filter(lambda example: example["answer_type"] != "unanswerable")
     return filtered_dataset
 
 
